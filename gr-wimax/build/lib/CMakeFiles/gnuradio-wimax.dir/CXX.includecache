@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/wimax/api.h
+gnuradio/attributes.h
+-
+
+../include/wimax/my_send_cb.h
+wimax/api.h
+-
+gnuradio/sync_block.h
+-
+
+/home/atexide/gr-wimax/gr-wimax/lib/my_send_cb_impl.cc
+config.h
+/home/atexide/gr-wimax/gr-wimax/lib/config.h
+gnuradio/io_signature.h
+-
+my_send_cb_impl.h
+/home/atexide/gr-wimax/gr-wimax/lib/my_send_cb_impl.h
+
+/home/atexide/gr-wimax/gr-wimax/lib/my_send_cb_impl.h
+wimax/my_send_cb.h
+-
+
