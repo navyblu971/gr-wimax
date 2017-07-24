@@ -7,6 +7,7 @@
  */
 
 #include <iostream>
+#include <string.h>
 
 using namespace std;
 
@@ -28,9 +29,15 @@ typedef struct  {
 } user ;
 user my_user ;
 #define OFDM_SIZE 512
+#define BYTE_PER_USER 5
 unsigned char gOFDMbuffer[OFDM_SIZE] ;
 int g_numberOfUsers = 23 ;
 unsigned char *data ;
+
+
+/*function */
+void addDataToOfdm(  int , unsigned char * , int) ;
+
 
 
 unsigned char gOfdmSymbolBuffer[OFDM_SIZE] ;
@@ -70,17 +77,24 @@ void sender_loop ()
 		while  (room > 0 )
 		{
 
-			getData2send (data,bytePerInterface ,  &nb ,  id)
+			getData2send (data,bytePerInterface ,  &nb ,  id) ;
 			if (nb > 0)
 			{
 
-				if (nb < BYTE_PER_USER)
-				addDataToOfdm(  id, data, nb)
-				else
-					addDataToOfdm(  id, data, BYTE_PER_USER)
+				if (nb < BYTE_PER_USER )
+				{
+				addDataToOfdm(  id, data, nb) ;
 				room-=nb ;
+				}
+				else
+				{
+					addDataToOfdm(  id, data, BYTE_PER_USER) ;
+					room-=BYTE_PER_USER ;
+
+				}
 
 			}
+
 
 
 			id++ ;
@@ -102,10 +116,12 @@ void sender_loop ()
 }
 
 
-void addDataToOfdm(  int id, unsigned  data, int nb)
+void addDataToOfdm(  int id, unsigned char *  data, int nb)
 {
 
-	gOFDMbuffer[id] = gOFDMbuffer[id-1] + nb ;
+	/* premier byte de la zone data donne le nombre de paquets envoyés */
+	gOFDMbuffer[id] = gOFDMbuffer[id-1] + gOFDMbuffer[gOFDMbuffer[id-1]] ;
+	memcpy(gOFDMbuffer + gOFDMbuffer[id] , data , nb) ;
 
 
 }
