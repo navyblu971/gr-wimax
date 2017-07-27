@@ -34,6 +34,21 @@ unsigned char gOFDMbuffer[OFDM_SIZE] ;
 int g_numberOfUsers = 23 ;
 unsigned char *data ;
 
+short gIdNextLocation ; //where do i add in gDATA_2_SEND_TAB
+
+
+typedef  struct
+{
+	unsigned char data  [250] ;
+	int size ;
+} DATA2SEND ;
+
+
+/* les données a envoyer sont stockés ici ..*/
+int gDataToSendIndex = 0 ; //index du numero de data à traiter
+DATA2SEND gDATA_2_SEND_TAB[16] ;
+
+int gCurrentIndex = 0 ;
 
 /*function */
 void addDataToOfdm(  int , unsigned char * , int) ;
@@ -41,6 +56,22 @@ void addDataToOfdm(  int , unsigned char * , int) ;
 
 
 unsigned char gOfdmSymbolBuffer[OFDM_SIZE] ;
+
+
+
+
+
+/*
+
+Add data to OFDM array
+
+ */
+void addDataToOFDM (unsigned char * data , int nb)
+{
+	memcpy(gDATA_2_SEND_TAB +gCurrentIndex, (const void *)data, sizeof(unsigned char )*nb) ;
+	gIdNextLocation= (gIdNextLocation>16) ? 0: gCurrentIndex++  ;
+
+}
 
 
 /*
@@ -77,27 +108,27 @@ void sender_loop ()
 		while  (room > 0 )
 		{
 
-			getData2send (data,bytePerInterface ,  &nb ,  id) ;
-			if (nb > 0)
-			{
 
-				if (nb < BYTE_PER_USER )
-				{
-				addDataToOfdm(  id, data, nb) ;
-				room-=nb ;
-				}
-				else
-				{
-					addDataToOfdm(  id, data, BYTE_PER_USER) ;
+
+
+
+					nb = (gDATA_2_SEND_TAB[gCurrentIndex].size >  BYTE_PER_USER ) ? gDATA_2_SEND_TAB[gCurrentIndex].size : BYTE_PER_USER ;
+
+					if (gDATA_2_SEND_TAB[gCurrentIndex].size > BYTE_PER_USER)
+						gDATA_2_SEND_TAB[gCurrentIndex].size = gDATA_2_SEND_TAB[gCurrentIndex].size - BYTE_PER_USER ;
+
+					addDataToOfdm(  id, gDATA_2_SEND_TAB[gCurrentIndex].data,nb) ;
+
 					room-=BYTE_PER_USER ;
 
-				}
-
-			}
 
 
 
-			id++ ;
+
+
+
+				gCurrentIndex++ ;
+
 
 		}
 
@@ -172,3 +203,29 @@ bool send ( user u[g_numberOfUsers ] )
 	return ret ;
 }
 
+
+/*
+ *
+ *
+ *
+ * ici on recupere les données de l'interface reseau à envoyer dans ofdm
+ */
+
+
+
+
+/*
+ *
+ * useless
+ *
+ */
+void getData2send (unsigned char * data, int bytePerInterface ,  int *nb , int  id)
+{
+
+	data =gDATA_2_SEND_TAB[gCurrentIndex].data ;
+	*nb = (gDATA_2_SEND_TAB[gCurrentIndex].size < bytePerInterface ) ? gDATA_2_SEND_TAB[gCurrentIndex].size : bytePerInterface ;
+
+
+
+
+}
