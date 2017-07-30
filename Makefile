@@ -1,7 +1,7 @@
-obj-m += ethWimax.o
+obj-m += ethOfdm.o
 
 all:
-	make -C /lib/modules/3.16.0-4-686-pae/build M=$(PWD) modules
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
 clean:
-	make -C /lib/modules/3.16.0-4-686-pae/build M=$(PWD) clean
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean

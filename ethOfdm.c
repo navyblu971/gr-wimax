@@ -1,28 +1,10 @@
 /*
- * INET		An implementation of the TCP/IP protocol suite for the LINUX
- *		operating system.  INET is implemented using the  BSD Socket
- *		interface as the means of communication with the user level.
+ * INET		
+ * Version:	
  *
- *		Pseudo-driver for the loopback interface.
+ * Authors:	
  *
- * Version:	@(#)loopback.c	1.0.4b	08/16/93
- *
- * Authors:	Ross Biro
- *		Fred N. van Kempen, <waltje@uWalt.NL.Mugnet.ORG>
- *		Donald Becker, <becker@scyld.com>
- *
- *		Alan Cox	:	Fixed oddments for NET3.014
- *		Alan Cox	:	Rejig for NET3.029 snap #3
- *		Alan Cox	:	Fixed NET3.029 bugs and sped up
- *		Larry McVoy	:	Tiny tweak to double performance
- *		Alan Cox	:	Backed out LMV's tweak - the linux mm
- *					can't take it...
- *              Michael Griffith:       Don't bother computing the checksums
- *                                      on packets received on the loopback
- *                                      interface.
- *		Alexey Kuznetsov:	Potential hang under some extreme
- *					cases removed.
- *
+ *		
  *		This program is free software; you can redistribute it and/or
  *		modify it under the terms of the GNU General Public License
  *		as published by the Free Software Foundation; either version
@@ -81,7 +63,7 @@ struct pcpu_lstats {
 /* The higher levels take care of making this non-reentrant (it's
  * called with bh's disabled).
  */
-static netdev_tx_t loopback_xmit(struct sk_buff *skb,
+static netdev_tx_t ethOfdm_xmit(struct sk_buff *skb,
 				 struct net_device *dev)
 {
 	struct pcpu_lstats *lb_stats;
@@ -111,7 +93,7 @@ static netdev_tx_t loopback_xmit(struct sk_buff *skb,
 	return NETDEV_TX_OK;
 }
 
-static void loopback_get_stats64(struct net_device *dev,
+static void ethOfdm_get_stats64(struct net_device *dev,
 				 struct rtnl_link_stats64 *stats)
 {
 	u64 bytes = 0;
@@ -143,7 +125,7 @@ static u32 always_on(struct net_device *dev)
 	return 1;
 }
 
-static int loopback_get_ts_info(struct net_device *netdev,
+static int ethOfdm_get_ts_info(struct net_device *netdev,
 				struct ethtool_ts_info *ts_info)
 {
 	ts_info->so_timestamping = SOF_TIMESTAMPING_TX_SOFTWARE |
@@ -155,12 +137,12 @@ static int loopback_get_ts_info(struct net_device *netdev,
 	return 0;
 };
 
-static const struct ethtool_ops loopback_ethtool_ops = {
+static const struct ethtool_ops ethOfdm_ethtool_ops = {
 	.get_link		= always_on,
-	.get_ts_info		= loopback_get_ts_info,
+	.get_ts_info		= ethOfdm_get_ts_info,
 };
 
-static int loopback_dev_init(struct net_device *dev)
+static int ethOfdm_dev_init(struct net_device *dev)
 {
 	
 	printk(KERN_INFO "Loading ethOverOFDM...\n");
@@ -172,23 +154,23 @@ static int loopback_dev_init(struct net_device *dev)
 	return 0;
 }
 
-static void loopback_dev_free(struct net_device *dev)
+static void ethOfdm_dev_free(struct net_device *dev)
 {
-	dev_net(dev)->loopback_dev = NULL;
+	dev_net(dev)->ethOfdm_dev = NULL;
 	free_percpu(dev->lstats);
 }
 
-static const struct net_device_ops loopback_ops = {
-	.ndo_init        = loopback_dev_init,
-	.ndo_start_xmit  = loopback_xmit,
-	.ndo_get_stats64 = loopback_get_stats64,
+static const struct net_device_ops ethOfdm_ops = {
+	.ndo_init        = ethOfdm_dev_init,
+	.ndo_start_xmit  = ethOfdm_xmit,
+	.ndo_get_stats64 = ethOfdm_get_stats64,
 	.ndo_set_mac_address = eth_mac_addr,
 };
 
 /* The loopback device is special. There is only one instance
  * per network namespace.
  */
-static void loopback_setup(struct net_device *dev)
+static void ethOfdm_setup(struct net_device *dev)
 {
 	dev->mtu		= 64 * 1024;
 	dev->hard_header_len	= ETH_HLEN;	/* 14	*/
@@ -209,21 +191,21 @@ static void loopback_setup(struct net_device *dev)
 		| NETIF_F_NETNS_LOCAL
 		| NETIF_F_VLAN_CHALLENGED ; 
 		
-	dev->ethtool_ops	= &loopback_ethtool_ops;
+	dev->ethtool_ops	= &ethOfdm_ethtool_ops;
 	//dev->header_ops		= &eth_header_ops;
-	dev->netdev_ops		= &loopback_ops;
+	dev->netdev_ops		= &ethOfdm_ops;
 	//dev->needs_free_netdev	= true;
-	//dev->priv_destructor	= loopback_dev_free;
+	//dev->priv_destructor	= ethOfdm_dev_free;
 }
 
-/* Setup and register the loopback device. */
-static __net_init int loopback_net_init(struct net *net)
+/* Setup and register the ethOfdm device. */
+static __net_init int ethOfdm_net_init(struct net *net)
 {
 	struct net_device *dev;
 	int err;
 
 	err = -ENOMEM;
-	dev = alloc_netdev(0, "ethOFDM", NET_NAME_UNKNOWN, loopback_setup);
+	dev = alloc_netdev(0, "ethOFDM", NET_NAME_UNKNOWN, ethOfdm_setup);
 	if (!dev)
 		goto out;
 
@@ -233,22 +215,22 @@ static __net_init int loopback_net_init(struct net *net)
 		goto out_free_netdev;
 
 	BUG_ON(dev->ifindex != LOOPBACK_IFINDEX);
-	net->loopback_dev = dev;
+	net->ethOfdm_dev = dev;
 	return 0;
 
 out_free_netdev:
 	free_netdev(dev);
 out:
 	if (net_eq(net, &init_net))
-		panic("loopback: Failed to register netdevice: %d\n", err);
+		panic("ethOfdm: Failed to register netdevice: %d\n", err);
 	return err;
 }
 
 /* Registered in net/core/dev.c */
-struct pernet_operations __net_initdata loopback_net_ops = {
-	.init = loopback_net_init,
+struct pernet_operations __net_initdata ethOfdm_net_ops = {
+	.init = ethOfdm_net_init,
 };
 
 
-module_init(loopback_net_init);
-module_exit(loopback_dev_free);
+module_init(ethOfdm_net_init);
+module_exit(ethOfdm_dev_free);
