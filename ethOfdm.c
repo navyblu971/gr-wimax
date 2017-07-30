@@ -156,7 +156,7 @@ static int ethOfdm_dev_init(struct net_device *dev)
 
 static void ethOfdm_dev_free(struct net_device *dev)
 {
-	dev_net(dev)->ethOfdm_dev = NULL;
+	//dev_net(dev)->ethOfdm_dev = NULL;
 	free_percpu(dev->lstats);
 }
 
@@ -214,8 +214,8 @@ static __net_init int ethOfdm_net_init(struct net *net)
 	if (err)
 		goto out_free_netdev;
 
-	BUG_ON(dev->ifindex != LOOPBACK_IFINDEX);
-	net->ethOfdm_dev = dev;
+	//BUG_ON(dev->ifindex != LOOPBACK_IFINDEX);
+	//net->ethOfdm_dev = dev;TODO
 	return 0;
 
 out_free_netdev:
